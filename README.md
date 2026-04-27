@@ -151,8 +151,46 @@ Opens at `http://localhost:8501`
 ---
  
 ## Screenshots
- 
-*Screenshots coming soon.*
+
+### Dashboard Overview — Metrics & Distribution Charts
+Key stats and rating/sentiment distribution charts at a glance.
+
+![Dashboard Overview](screenshots/dashboard_overview.png)
+
+---
+
+### Review Volume Over Time
+Monthly review submission trends across the full dataset.
+
+![Time Series](screenshots/time_series.png)
+
+---
+
+### Word Cloud — Most Common Review Terms
+Visual summary of the most frequent words across 21,000+ reviews.
+
+![Word Cloud](screenshots/word_cloud.png)
+
+---
+
+### ML Results — Classifier Performance & TF-IDF
+Accuracy metric, classification report, and top predictive words by TF-IDF score.
+
+![ML Results](screenshots/ml_results.png)
+
+---
+
+### AI Insights — Topic Extraction
+Gemini surfaces recurring themes across review samples with frequency hints and example quotes.
+
+![AI Insights Topics](screenshots/ai_insights_topics.png)
+
+---
+
+### AI Insights — Aspect Analysis
+Gemini breaks down each review into product features with individual positive/negative/neutral labels.
+
+![AI Insights Aspects](screenshots/ai_insights_aspects.png)
  
 ---
  
