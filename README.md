@@ -1,157 +1,165 @@
-# Project 4: Customer Review Analysis
-
-Analyze 21,000+ real Amazon reviews using **traditional ML** (TF-IDF + Logistic Regression) and **modern AI** (Google Gemini zero-shot classification, aspect-based sentiment, topic extraction). Compare both approaches to understand the evolution of text analysis.
-
-## Dataset
-
-**Source:** Amazon Reviews Dataset (Kaggle) — real customer reviews  
-**Size:** 21,000+ reviews  
-**File:** `data/amazon_reviews.csv`
-
+# Customer Review Analysis — NLP with Traditional ML and Modern AI
+ 
+An end-to-end review analysis pipeline that processes 21,000+ real Amazon reviews using both traditional machine learning (TF-IDF + Logistic Regression) and modern AI (Google Gemini zero-shot classification, aspect extraction, and topic modeling) — wrapped in an interactive Streamlit dashboard.
+ 
+Built with Python, scikit-learn, Streamlit, and Google Gemini.
+ 
+---
+ 
+## What It Does
+ 
+```
+Raw Reviews  →  Clean  →  TF-IDF Features  →  Logistic Regression  →  Sentiment Labels
+                                                                               ↓
+                                                            Gemini  →  Aspects + Topics
+```
+ 
+Each review is cleaned and vectorized into TF-IDF features, then a Logistic Regression classifier predicts sentiment (Positive/Negative). In parallel, Gemini performs zero-shot classification on the same reviews and extracts aspect-level sentiments and recurring themes — enabling a direct comparison of both approaches.
+ 
+---
+ 
+## Features
+ 
+- **Text Preprocessing** — Lowercasing, punctuation removal, whitespace normalization, and word count tracking
+- **TF-IDF Vectorization** — Converts review text into a 2,000-feature sparse matrix with English stopwords removed
+- **Sentiment Classification** — Logistic Regression trained on labeled reviews achieves 92.5% accuracy on 21,000+ real-world reviews
+- **Zero-Shot LLM Classification** — Gemini classifies sentiment with no training data, enabling direct ML vs LLM comparison
+- **Aspect Extraction** — Gemini identifies product features mentioned in reviews and classifies each as positive, negative, or neutral
+- **Topic Modeling** — Gemini surfaces recurring themes across review samples with frequency hints and example quotes
+- **Streamlit Dashboard** — Three-tab interface: Dataset Overview, ML Results, and AI Insights
+- **Word Cloud** — Visual summary of the most common terms across all reviews
+- **Time Series** — Monthly review volume chart showing submission trends over time
+- **Rating vs Sentiment Breakdown** — Cross-tab showing how star ratings map to ML sentiment predictions
+- **Custom Review Classifier** — Enter any review text and get an instant ML sentiment prediction
+---
+ 
+## Tech Stack
+ 
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Streamlit |
+| Machine Learning | scikit-learn (TfidfVectorizer, LogisticRegression, train_test_split) |
+| AI Analysis | Google Gemini (gemini-2.5-flash) |
+| Data Processing | pandas, NumPy |
+| Visualization | matplotlib, WordCloud |
+| Environment | python-dotenv |
+ 
+---
+ 
+## The Dataset
+ 
+21,000+ real Amazon customer reviews from Trustpilot:
+ 
 | Column | Description |
 |--------|-------------|
 | `review_id` | Unique review identifier |
 | `reviewer_name` | Reviewer display name |
 | `country` | Reviewer country (US, GB, CA, IN, etc.) |
 | `review_date` | Date review was posted |
-| `rating` | Star rating (1-5) |
+| `rating` | Star rating (1–5) |
 | `review_title` | Short review headline |
 | `review_text` | Full review text |
 | `date_of_experience` | Date of the experience reviewed |
-
-
-## Traditional vs Modern AI Approach
-
-| Approach | How It Works | Pros | Cons |
-|----------|-------------|------|------|
-| **TF-IDF + Logistic Regression** | Convert text to numerical features, train a classifier on labeled data | Fast, cheap at scale, deterministic | Needs labeled data, misses nuance |
-| **Gemini Zero-Shot** | Describe the task in English, the LLM classifies without training | No training data needed, understands context | API cost, slower, non-deterministic |
-| **Aspect-Based (Gemini)** | Ask the LLM to extract what aspects are positive/negative | Rich insights, no training | Expensive at scale |
-| **Topic Extraction (Gemini)** | Ask the LLM to find common themes across reviews | Discovers structure automatically | Requires sampling for large datasets |
-
+ 
+The dataset skews heavily negative (avg rating: 2.2) — customers are more motivated to write reviews when unhappy. This real-world imbalance makes the classification task more challenging and the insights more interesting.
+ 
+---
+ 
+## Project Structure
+ 
+```
+customer-review-analysis/
+├── review_analyzer.py   ← Full NLP pipeline: clean, TF-IDF, classify, LLM analysis
+├── review_app.py        ← Streamlit dashboard
+├── Project_4_Customer_Review_Analysis.ipynb  ← Analysis walkthrough and reflection
+├── requirements.txt     ← Project dependencies
+├── .env.example         ← Environment variable template
+├── .env                 ← API keys (not committed)
+├── .gitignore
+│
+├── data/
+│   └── amazon_reviews.csv   ← 21,000+ real Amazon reviews
+│
+└── .streamlit/
+    └── config.toml      ← Custom dark theme configuration
+```
+ 
+---
+ 
 ## Getting Started
-
-### 1. Install dependencies
-
+ 
+### 1. Clone the Repository
+ 
+```bash
+git clone https://github.com/Drizztovski/customer-review-analysis.git
+cd customer-review-analysis
+```
+ 
+### 2. Install Dependencies
+ 
 ```bash
 pip install -r requirements.txt
 ```
-
-### 2. Set up your API key
-
+ 
+### 3. Configure API Key (optional — only needed for AI features)
+ 
 ```bash
 cp .env.example .env
-# Edit .env and add your Google Gemini API key
-# Get a free key at: https://aistudio.google.com/apikey
 ```
-
-The API key is optional — traditional ML features work without it. You only need it for LLM-based analysis (zero-shot classification, aspect extraction, topic extraction).
-
-### 3. Work through the notebook
-
-Open `Project_4_Customer_Review_Analysis.ipynb` in Jupyter and follow the guided walkthrough.
-
-### 4. Run the Streamlit dashboard
-
+ 
+Open `.env` and add your key:
+ 
+```env
+GOOGLE_API_KEY=your_gemini_api_key_here
+```
+ 
+Get a free key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey). The app runs fully without it — zero-shot classification, aspect extraction, and topic modeling are the only features that require a key.
+ 
+### 4. Run the App
+ 
 ```bash
-# Test with your completed code
 streamlit run review_app.py
-
-# Or test the reference solution
-streamlit run solution/review_app.py
 ```
-
-## Project Structure
-
-```
-project-4/
-├── data/
-│   └── amazon_reviews.csv          # 21K real Amazon reviews
-├── solution/
-│   ├── review_analyzer.py          # Complete solution — engine
-│   └── review_app.py               # Complete solution — Streamlit app
-├── review_analyzer.py              # Student version (TODOs 1-10)
-├── review_app.py                   # Student version (TODOs 11-15)
-├── Project_4_Customer_Review_Analysis.ipynb  # Guided walkthrough
-├── requirements.txt                # Python dependencies
-├── .env.example                    # API key template
-├── .gitignore                      # Git ignore rules
-└── README.md                       # This file
-```
-
-## TODO Summary
-
-### review_analyzer.py (TODOs 1-10)
-
-| TODO | Function | What to Implement |
-|------|----------|-------------------|
-| 1 | `load_and_clean()` | Load CSV, drop missing values, parse dates |
-| 2 | `clean_text()` | Lowercase, remove punctuation, normalize whitespace |
-| 3 | `preprocess_reviews()` | Apply cleaning, add word_count and sentiment_label |
-| 4 | `build_tfidf_features()` | Create TfidfVectorizer, fit and transform |
-| 5 | `train_sentiment_classifier()` | Train LogisticRegression on TF-IDF features |
-| 6 | `classify_sentiment_llm()` | Zero-shot sentiment classification with Gemini |
-| 7 | `extract_aspects_llm()` | Extract aspect-level sentiments as JSON |
-| 8 | `extract_topics_llm()` | Identify common themes across review samples |
-| 9 | `plot_sentiment_distribution()` | Bar chart of sentiment label counts |
-| 10 | `ReviewAnalyzer.run_analysis()` | Wire the full ML pipeline together |
-
-### review_app.py (TODOs 11-15)
-
-| TODO | Section | What to Implement |
-|------|---------|-------------------|
-| 11 | Session State | Initialize engine and analysis_run variables |
-| 12 | Run Button | Create ReviewAnalyzer, run analysis, store in state |
-| 13 | Overview Tab | Metrics (total reviews, avg rating, etc.) + distribution charts |
-| 14 | ML Results Tab | Accuracy display, word importance, custom review classifier |
-| 15 | AI Insights Tab | LLM comparison table, topic extraction, aspect analysis |
-
-## GitHub Workflow
-
-### Initial setup
-
-```bash
-git init
-git add README.md requirements.txt .env.example .gitignore data/ review_analyzer.py review_app.py
-git add Project_4_Customer_Review_Analysis.ipynb
-git commit -m "Project 4: initial setup with dataset and starter code"
-```
-
-### Commit as you go (one commit per part)
-
-```bash
-# After completing Part 2 (text preprocessing)
-git add review_analyzer.py
-git commit -m "feat: implement text cleaning and preprocessing (TODOs 2-3)"
-
-# After completing Part 3 (ML classification)
-git add review_analyzer.py
-git commit -m "feat: implement TF-IDF features and sentiment classifier (TODOs 4-5)"
-
-# After completing Part 4-5 (LLM analysis)
-git add review_analyzer.py
-git commit -m "feat: implement LLM classification, aspects, and topics (TODOs 6-8)"
-
-# After completing Part 6 (pipeline + visualization)
-git add review_analyzer.py
-git commit -m "feat: implement visualization and full pipeline class (TODOs 9-10)"
-
-# After completing the Streamlit app
-git add review_app.py
-git commit -m "feat: implement Streamlit dashboard (TODOs 11-15)"
-
-# Final commit with notebook
-git add Project_4_Customer_Review_Analysis.ipynb
-git commit -m "docs: complete notebook with analysis and reflections"
-```
-
-### Optional: feature branching
-
-```bash
-git checkout -b feature/text-preprocessing
-# complete TODOs 2-3
-git add review_analyzer.py
-git commit -m "feat: text cleaning and preprocessing"
-git checkout main
-git merge feature/text-preprocessing
-```
+ 
+Opens at `http://localhost:8501`
+ 
+---
+ 
+## How It Works
+ 
+### The Analysis Engine (`review_analyzer.py`)
+ 
+1. **Data Cleaning** — Loads the CSV, drops rows with missing review text or ratings, strips whitespace from string columns, and parses review dates as datetime.
+2. **Text Preprocessing** — Converts to lowercase, removes punctuation and special characters, normalizes whitespace, adds word count per review, and maps star ratings to sentiment labels (1–2 = Negative, 3 = Neutral, 4–5 = Positive).
+3. **TF-IDF Vectorization** — Fits a TfidfVectorizer with 2,000 features and English stopwords removed on the training set. Words that appear frequently in one review but rarely across all reviews get higher scores — making the signal more meaningful than simple word counts.
+4. **Sentiment Classification** — Trains a Logistic Regression classifier on binary sentiment (Positive/Negative only — Neutral reviews excluded for cleaner signal). Achieves 92.5% accuracy on the held-out test set.
+5. **Zero-Shot LLM Classification** — Sends each review to Gemini with a single prompt asking for a Positive/Negative/Neutral label. No training data required — the model infers from context.
+6. **Aspect Extraction** — Prompts Gemini to identify product features or topics mentioned in a review and classify each as positive, negative, or neutral. Returns structured JSON parsed into a list of dicts.
+7. **Topic Modeling** — Sends a batch of reviews to Gemini and asks it to surface recurring themes with frequency hints and example quotes.
+---
+ 
+## Key Technical Decisions
+ 
+**Binary classification over three-class** — Neutral (3-star) reviews are excluded from ML training. Three-star reviews are genuinely ambiguous — they typically contain both positive and negative language — so including them as a third class degrades model performance without adding useful signal.
+ 
+**TF-IDF over raw counts** — Raw word counts treat every occurrence equally. TF-IDF penalizes common words that appear across all reviews (like "Amazon", "order", "delivery") and rewards words that are distinctive to specific reviews — giving the classifier more meaningful features to work with.
+ 
+**JSON stripping for LLM responses** — Gemini occasionally wraps JSON responses in markdown fences (` ```json `) despite being explicitly told not to. The engine strips these with a regex before parsing to avoid silent failures.
+ 
+**Zero-shot vs trained — when each wins** — The ML classifier is fast, deterministic, and cheap at scale. Gemini handles nuance and sarcasm better but costs API calls per review. The dashboard lets you compare both approaches side by side on the same sample.
+ 
+---
+ 
+## Screenshots
+ 
+*Screenshots coming soon.*
+ 
+---
+ 
+## Author
+ 
+**AJ Amatrudo** — IT professional transitioning to data science and business intelligence.
+ 
+- GitHub: [github.com/Drizztovski](https://github.com/Drizztovski)
+- Certifications: Python 3, SQL, Git & GitHub (Codecademy)
+- Training: Data Scientist: Analytics Specialist (Codecademy) + Data Science with AI Bootcamp
