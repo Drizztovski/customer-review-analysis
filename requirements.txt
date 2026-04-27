@@ -1,8 +1,33 @@
+# Customer Review Analysis — Dependencies
+# Python 3.10+ recommended
+
+# Data Analysis
 pandas>=2.0
 numpy>=1.24
-scikit-learn>=1.3
-matplotlib>=3.7
-seaborn>=0.12
-google-genai>=1.0
-streamlit>=1.30
+
+# Machine Learning
+scikit-learn>=1.3       # TfidfVectorizer, LogisticRegression, train_test_split
+
+# AI Integration
+google-genai>=1.0       # Gemini API for zero-shot classification and topic extraction
+
+# Environment Management
 python-dotenv>=1.0
+
+# Visualization
+matplotlib>=3.7
+wordcloud>=1.9          # Word cloud visualization
+
+# Web App
+streamlit>=1.30
+
+# Standard Library (no pip install needed)
+# os        # File path handling
+# re        # Text cleaning with regex
+# json      # Parsing LLM responses
+# sys       # Path insertion for local imports
+
+# Development Tools
+jupyter>=1.0
+ipykernel>=6.0
+nbconvert>=7.0

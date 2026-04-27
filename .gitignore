@@ -1,7 +1,18 @@
+# API keys — never commit these
 .env
+
+# Python
 __pycache__/
-.ipynb_checkpoints/
-.DS_Store
 *.pyc
-Amazon_Reviews.csv.zip
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
 desktop.ini
+
+# Data (large files)
+Amazon_Reviews.csv.zip

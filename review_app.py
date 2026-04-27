@@ -1,12 +1,13 @@
 """
-review_app.py — Streamlit UI for Customer Review Analysis (Student Version)
-===============================================================================
+review_app.py — Streamlit Dashboard for Customer Review Analysis
+
 A web interface for analyzing Amazon reviews using traditional ML and modern AI
-approaches. Perform sentiment classification, extract topics, and generate insights.
+approaches. Performs sentiment classification, extracts topics, and generates
+insights via Google Gemini.
 
 Run with:  streamlit run review_app.py
 
-Students: Complete the TODO sections to build the full app.
+Author: AJ Amatrudo
 """
 
 import streamlit as st
@@ -19,8 +20,6 @@ import os
 # Make sure we can import from the current directory
 sys.path.insert(0, os.path.dirname(__file__))
 
-# NOTE: Import from solution/ to use completed engine, or from current dir to test yours
-# from solution.review_analyzer import ReviewAnalyzer
 from review_analyzer import ReviewAnalyzer
 
 
@@ -66,16 +65,6 @@ with st.sidebar:
 
     st.divider()
 
-    if st.session_state.get('analysis_run'):
-        st.markdown("**📈 ML Results**")
-        from sklearn.metrics import accuracy_score, classification_report
-        _engine = st.session_state.engine
-        _accuracy = accuracy_score(_engine.y_test, _engine.y_pred)
-        st.metric("Accuracy", f"{_accuracy:.1%}")
-        st.markdown("**Classification Report**")
-        _report = classification_report(_engine.y_test, _engine.y_pred)
-        st.code(_report, language=None)
-
 
 # ============================================================
 # SESSION STATE
@@ -104,6 +93,17 @@ if run_button:
             st.toast("Analysis complete!", icon="✅")
         except Exception as e:
             st.error(f"Error running analysis: {e}")
+
+if st.session_state.get('analysis_run'):
+    with st.sidebar:
+        st.markdown("**📈 ML Results**")
+        from sklearn.metrics import accuracy_score, classification_report
+        _engine = st.session_state.engine
+        _accuracy = accuracy_score(_engine.y_test, _engine.y_pred)
+        st.metric("Accuracy", f"{_accuracy:.1%}")
+        st.markdown("**Classification Report**")
+        _report = classification_report(_engine.y_test, _engine.y_pred)
+        st.code(_report, language=None)
 
 
 # ============================================================
@@ -164,6 +164,42 @@ if st.session_state.analysis_run:
             st.pyplot(fig)
             plt.close()
 
+        st.divider()
+
+        st.markdown("**Review Volume Over Time**")
+        if engine.df['review_date'].notna().sum() > 0:
+            monthly = engine.df.set_index('review_date').resample('ME').size()
+            fig, ax = plt.subplots(figsize=(14, 4))
+            ax.plot(monthly.index, monthly.values, color='#4FC3F7', linewidth=2)
+            ax.fill_between(monthly.index, monthly.values, alpha=0.2, color='#4FC3F7')
+            ax.set_xlabel('Date')
+            ax.set_ylabel('Number of Reviews')
+            ax.set_title('Monthly Review Volume')
+            ax.grid(axis='y', alpha=0.3)
+            plt.tight_layout()
+            st.pyplot(fig)
+            plt.close()
+        else:
+            st.info("No date data available for time series analysis.")
+
+        st.divider()
+
+        st.markdown("**Word Cloud — Most Common Review Terms**")
+        from wordcloud import WordCloud
+        all_text = ' '.join(engine.df['clean_text'].dropna().values)
+        wc = WordCloud(
+            width=1200, height=400,
+            background_color='white',
+            colormap='winter',
+            max_words=150,
+            collocations=False
+        ).generate(all_text)
+        fig, ax = plt.subplots(figsize=(14, 5))
+        ax.imshow(wc, interpolation='bilinear')
+        ax.axis('off')
+        st.pyplot(fig)
+        plt.close()
+
     # --------------------------------------------------------
     # TAB 2: ML Results
     # --------------------------------------------------------
@@ -205,7 +241,7 @@ if st.session_state.analysis_run:
         top_indices = np.argsort(tfidf_scores)[-15:][::-1]
         top_words = feature_names[top_indices]
         top_scores = tfidf_scores[top_indices]
-        ax.barh(range(len(top_words)), top_scores, color='coral', edgecolor='black')
+        ax.barh(range(len(top_words)), top_scores, color='lightblue', edgecolor='black')
         ax.set_yticks(range(len(top_words)))
         ax.set_yticklabels(top_words)
         ax.set_xlabel('Average TF-IDF Score')
@@ -216,6 +252,25 @@ if st.session_state.analysis_run:
         plt.close()
 
         st.divider()
+
+        st.markdown("**Rating vs Sentiment Breakdown**")
+        crosstab = pd.crosstab(engine.df['rating'], engine.df['sentiment_label'])
+        fig, ax = plt.subplots(figsize=(10, 5))
+        crosstab.plot(
+            kind='bar',
+            ax=ax,
+            color=['#95a5a6', '#e74c3c', '#2ecc71'],
+            edgecolor='black'
+        )
+        ax.set_xlabel('Star Rating')
+        ax.set_ylabel('Number of Reviews')
+        ax.set_title('Sentiment Label by Star Rating')
+        ax.legend(title='Sentiment')
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
+        ax.grid(axis='y', alpha=0.3)
+        plt.tight_layout()
+        st.pyplot(fig)
+        plt.close()
 
     # --------------------------------------------------------
     # TAB 3: AI Insights
@@ -261,17 +316,3 @@ if st.session_state.analysis_run:
 
 else:
     st.info("Configure your settings in the sidebar and click **🚀 Run Analysis** to get started.")
-
-
-# ============================================================
-# OPTIONAL EXTENSIONS
-# ============================================================
-
-# OPTIONAL TODO A: Add word cloud visualization
-# Show a word cloud of the most common words in reviews
-
-# OPTIONAL TODO B: Add rating vs sentiment breakdown
-# Create a cross-tab showing how ratings (1-5) map to ML sentiment predictions
-
-# OPTIONAL TODO C: Add time series analysis
-# If review_date is available, show review count over time

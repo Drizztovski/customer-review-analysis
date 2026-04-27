@@ -1,14 +1,15 @@
 """
-Project 4: Amazon Product Review Analysis Engine
-Data Analytics Bootcamp
+review_analyzer.py — Amazon Product Review Analysis Engine
 
-This module provides tools for analyzing Amazon product reviews using both traditional
-machine learning (TF-IDF + Logistic Regression) and modern LLM-based approaches
-(Google Gemini zero-shot classification and aspect extraction).
+Analyzes Amazon product reviews using both traditional machine learning
+(TF-IDF + Logistic Regression) and modern LLM-based approaches (Google Gemini
+zero-shot classification, aspect extraction, and topic modeling).
 
 Dataset: data/amazon_reviews.csv
 Columns: review_id, reviewer_name, country, review_date, rating, review_title,
          review_text, date_of_experience
+
+Author: AJ Amatrudo
 """
 
 import os
@@ -41,12 +42,8 @@ def load_and_clean(filepath):
     """
     Load CSV file and perform initial data cleaning.
 
-    Steps:
-    1. Load the CSV from filepath
-    2. Drop rows where review_text or rating is missing
-    3. Strip whitespace from all string columns
-    4. Parse review_date as datetime
-    5. Return cleaned DataFrame
+    Drops rows with missing review_text or rating, strips whitespace from
+    string columns, and parses review_date as datetime.
 
     Parameters
     ----------
@@ -79,11 +76,8 @@ def clean_text(text):
     """
     Clean and normalize text for analysis.
 
-    Steps:
-    1. Convert to lowercase
-    2. Remove all punctuation and special characters (keep alphanumeric and whitespace)
-    3. Remove extra whitespace (leading, trailing, multiple spaces)
-    4. Return cleaned string
+    Converts to lowercase, removes punctuation and special characters,
+    and strips extra whitespace.
 
     Parameters
     ----------
@@ -110,14 +104,9 @@ def preprocess_reviews(df):
     """
     Preprocess review DataFrame with text cleaning and sentiment labeling.
 
-    Steps:
-    1. Apply clean_text() to review_text column, store back in review_text
-    2. Create word_count column with word counts from cleaned review_text
-    3. Create sentiment_label column:
-       - 'Negative' for ratings 1-2
-       - 'Neutral' for rating 3
-       - 'Positive' for ratings 4-5
-    4. Return preprocessed DataFrame
+    Applies clean_text() to the review_text column, adds a word_count column,
+    and maps star ratings to sentiment labels: 1-2 = Negative, 3 = Neutral,
+    4-5 = Positive.
 
     Parameters
     ----------
@@ -145,12 +134,8 @@ def build_tfidf_features(texts, max_features=2000):
     """
     Build TF-IDF feature matrix from text documents.
 
-    Steps:
-    1. Create TfidfVectorizer with:
-       - max_features=max_features
-       - stop_words='english'
-    2. Fit and transform the texts using vectorizer.fit_transform()
-    3. Return (tfidf_matrix, vectorizer) tuple
+    Creates a TfidfVectorizer with English stopwords removed, fits it on the
+    provided texts, and returns both the feature matrix and the fitted vectorizer.
 
     Parameters
     ----------
@@ -178,12 +163,8 @@ def train_sentiment_classifier(X_train, y_train):
     """
     Train a Logistic Regression classifier for sentiment prediction.
 
-    Steps:
-    1. Create LogisticRegression with:
-       - max_iter=1000
-       - random_state=42
-    2. Fit model on X_train, y_train
-    3. Return fitted model
+    Trains a Logistic Regression classifier with max_iter=1000 and
+    random_state=42 on the provided TF-IDF features and sentiment labels.
 
     Parameters
     ----------
@@ -210,11 +191,9 @@ def classify_sentiment_llm(review_text, client, model='gemini-2.5-flash'):
     """
     Classify sentiment of a review using Google Gemini zero-shot classification.
 
-    Steps:
-    1. Construct a prompt asking Gemini to classify sentiment as 'Positive', 'Negative', or 'Neutral'
-    2. Call client.models.generate_content() with the prompt
-    3. Extract sentiment from response text (expect one of: 'Positive', 'Negative', 'Neutral')
-    4. Return the sentiment label as a string
+    Sends the review text to Gemini with a zero-shot prompt and returns one
+    of three labels: 'Positive', 'Negative', or 'Neutral'. Defaults to
+    'Neutral' if the response is unexpected.
 
     Parameters
     ----------
@@ -250,16 +229,9 @@ def extract_aspects_llm(review_text, client, model='gemini-2.5-flash'):
     """
     Extract key aspects and their sentiments from a review using Gemini.
 
-    Steps:
-    1. Construct a prompt asking Gemini to identify aspects (features, topics) mentioned
-       in the review and their sentiment
-    2. Request JSON response with array: [{aspect, sentiment, quote}, ...]
-       - aspect: the feature/topic mentioned (e.g., 'battery life', 'design')
-       - sentiment: 'positive', 'negative', or 'neutral'
-       - quote: a short quote from the review supporting this aspect sentiment
-    3. Call client.models.generate_content()
-    4. Parse JSON response and return list of dicts
-    5. If parsing fails, return empty list
+    Asks Gemini to identify product features or topics mentioned in the review
+    and classify each as positive, negative, or neutral. Returns structured
+    JSON parsed into a list of dicts. Empty list returned if JSON parsing fails.
 
     Parameters
     ----------
@@ -308,16 +280,9 @@ def extract_topics_llm(reviews_sample, client, model='gemini-2.5-flash'):
     """
     Extract top themes and topics from a sample of reviews using Gemini.
 
-    Steps:
-    1. Take the list of review texts (10-20 reviews)
-    2. Construct a prompt asking Gemini to identify the top themes/topics across all reviews
-    3. Request JSON response with array: [{topic, frequency_hint, example_quote}, ...]
-       - topic: the theme/topic name (e.g., 'battery life', 'customer service')
-       - frequency_hint: how often mentioned (e.g., 'very common', 'occasional', 'rare')
-       - example_quote: a representative quote from one review
-    4. Call client.models.generate_content()
-    5. Parse JSON response and return list of dicts
-    6. If parsing fails, return empty list
+    Sends a batch of review texts to Gemini and asks it to identify the most
+    common themes across all of them. Returns structured JSON parsed into a
+    list of dicts. Empty list returned if JSON parsing fails.
 
     Parameters
     ----------
@@ -371,11 +336,8 @@ def plot_sentiment_distribution(df):
     """
     Create a bar chart showing sentiment distribution.
 
-    Steps:
-    1. Count sentiment_label values
-    2. Create bar plot with counts for 'Positive', 'Negative', 'Neutral'
-    3. Add appropriate title, xlabel, ylabel
-    4. Display plot using plt.show()
+    Counts sentiment_label values and displays a bar chart with consistent
+    colors: green for Positive, red for Negative, gray for Neutral.
 
     Parameters
     ----------
@@ -401,10 +363,8 @@ def plot_sentiment_distribution(df):
 
 def plot_rating_distribution(df):
     """
-    Create a bar chart showing rating distribution.
-
-    This is a pre-written helper function for students.
-
+    Create a bar chart showing distribution of star ratings.
+    
     Parameters
     ----------
     df : pd.DataFrame
@@ -430,9 +390,7 @@ def plot_rating_distribution(df):
 def plot_top_words(vectorizer, tfidf_matrix, n=15):
     """
     Create a bar chart of top N words by TF-IDF score.
-
-    This is a pre-written helper function for students.
-
+    
     Parameters
     ----------
     vectorizer : TfidfVectorizer
@@ -502,12 +460,6 @@ class ReviewAnalyzer:
         """
         Initialize the ReviewAnalyzer.
 
-        Steps:
-        1. Store filepath, model parameters
-        2. Get api_key from parameter or from environment variable (os.getenv('GOOGLE_API_KEY'))
-        3. Initialize Gemini client with genai.Client(api_key=api_key)
-        4. Initialize storage attributes to None: df, tfidf_matrix, vectorizer, classifier
-
         Parameters
         ----------
         filepath : str
@@ -543,15 +495,9 @@ class ReviewAnalyzer:
         """
         Run the complete review analysis pipeline.
 
-        Steps:
-        1. Load and clean data using load_and_clean(self.filepath)
-        2. Preprocess reviews using preprocess_reviews(self.df)
-        3. Filter to binary sentiment (Positive/Negative only)
-        4. Split data using train_test_split with test_size=0.2, random_state=42
-        5. Build TF-IDF features on training text using build_tfidf_features()
-        6. Train classifier using train_sentiment_classifier(X_train, y_train)
-        7. Evaluate on test set and store: self.y_test, self.y_pred
-        8. Print summary: "Analysis complete! Loaded X reviews. Accuracy: Y%"
+        Loads and cleans data, preprocesses reviews, filters to binary sentiment
+        (Positive/Negative only), builds TF-IDF features, trains the classifier,
+        and evaluates on the test set. Results stored in instance attributes.
 
         Returns
         -------
@@ -587,8 +533,6 @@ class ReviewAnalyzer:
     def classify_reviews_llm(self, n_samples=20):
         """
         Classify sentiment of a sample of reviews using both ML and LLM approaches.
-
-        This is a pre-written helper function for students.
 
         Parameters
         ----------
@@ -638,8 +582,6 @@ class ReviewAnalyzer:
         """
         Extract aspects and sentiments from a sample of reviews.
 
-        This is a pre-written helper function for students.
-
         Parameters
         ----------
         n_samples : int, optional
@@ -671,8 +613,6 @@ class ReviewAnalyzer:
         """
         Get top themes and topics from a sample of reviews.
 
-        This is a pre-written helper function for students.
-
         Parameters
         ----------
         n_samples : int, optional
@@ -695,9 +635,7 @@ class ReviewAnalyzer:
     def get_summary(self):
         """
         Get summary statistics of the analysis.
-
-        This is a pre-written helper function for students.
-
+        
         Returns
         -------
         dict
@@ -729,8 +667,6 @@ class ReviewAnalyzer:
 # ============================================================================
 
 if __name__ == '__main__':
-    # Example: Initialize and run analysis
-    # analyzer = ReviewAnalyzer('data/amazon_reviews.csv')
-    # analyzer.run_analysis()
-    # print(analyzer.get_summary())
-    pass
+    analyzer = ReviewAnalyzer('data/amazon_reviews.csv')
+    analyzer.run_analysis()
+    print(analyzer.get_summary())
