@@ -33,8 +33,23 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.title("📝 Customer Review Analysis Dashboard")
-st.caption("Analyze Amazon reviews with traditional ML and modern AI")
+st.markdown("""
+<div style="
+    background-color: #1E2A3A;
+    padding: 1.5rem 2rem;
+    border-radius: 10px;
+    border-left: 5px solid #4FC3F7;
+    margin-bottom: 1rem;
+">
+    <h1 style="color: #FAFAFA; margin: 0; font-size: 2rem;">📝 Customer Review Analysis Dashboard</h1>
+    <p style="color: #4FC3F7; margin: 0.4rem 0 0 0; font-size: 1rem;">
+        TF-IDF Classification · Zero-Shot LLM Analysis · Aspect-Based Sentiment
+    </p>
+    <p style="color: #8BA3B8; margin: 0.3rem 0 0 0; font-size: 0.85rem;">
+        Built by AJ Amatrudo · Data Analytics Bootcamp Portfolio Project
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 
 # ============================================================
@@ -64,6 +79,20 @@ with st.sidebar:
     run_button = st.button("🚀 Run Analysis", type="primary", use_container_width=True)
 
     st.divider()
+
+    if st.session_state.get('analysis_run'):
+        _e = st.session_state.engine
+        _summary = _e.get_summary()
+        st.markdown("""
+        <div style="background-color:#1A3A2A; padding:0.8rem 1rem; border-radius:8px;
+                    border-left:4px solid #4CAF50; margin-bottom:0.5rem;">
+            <span style="color:#4CAF50; font-weight:bold;">✅ Analysis Complete</span>
+        </div>
+        """, unsafe_allow_html=True)
+        st.caption(f"📝 {_summary['total_reviews']:,} reviews analyzed")
+        st.caption(f"⭐ Avg rating: {_summary['avg_rating']:.2f}")
+        st.caption(f"🎯 ML Accuracy: see ML Results tab")
+        st.divider()
 
 
 # ============================================================
@@ -315,4 +344,74 @@ if st.session_state.analysis_run:
                                 st.caption(f"*\"{aspect.get('quote', '')}\"*")
 
 else:
-    st.info("Configure your settings in the sidebar and click **🚀 Run Analysis** to get started.")
+    st.markdown("""
+    <div style="background-color:#1E2A3A; padding:1.5rem 2rem; border-radius:10px;
+                border-left:5px solid #4FC3F7; margin-bottom:1.5rem;">
+        <h3 style="color:#FAFAFA; margin:0 0 0.5rem 0;">👋 Welcome to the Customer Review Analysis Dashboard</h3>
+        <p style="color:#B0C4D8; margin:0; font-size:0.95rem;">
+            This tool compares <strong style="color:#4FC3F7;">traditional ML</strong> (TF-IDF + Logistic Regression)
+            against <strong style="color:#4FC3F7;">modern AI</strong> (Google Gemini zero-shot classification)
+            on real Amazon review data — measuring which approach is more accurate, and where each one wins.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### ⚙️ Configuration Guide")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("""
+        <div style="background-color:#1A2332; padding:1rem; border-radius:8px; margin-bottom:1rem;">
+            <p style="color:#4FC3F7; font-weight:bold; margin:0 0 0.3rem 0;">📁 Data File Path</p>
+            <p style="color:#B0C4D8; font-size:0.88rem; margin:0;">
+                Points to your Amazon reviews CSV. The default
+                <strong>data/amazon_reviews.csv</strong> is already
+                included and ready to use.
+            </p>
+        </div>
+        <div style="background-color:#1A2332; padding:1rem; border-radius:8px; margin-bottom:1rem;">
+            <p style="color:#4FC3F7; font-weight:bold; margin:0 0 0.3rem 0;">🔢 Number of LLM Samples</p>
+            <p style="color:#B0C4D8; font-size:0.88rem; margin:0;">
+                How many reviews to send to Gemini for AI analysis.
+                Higher numbers give better results but use more API quota.
+                <strong>20 is a good starting point.</strong>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("""
+        <div style="background-color:#1A2332; padding:1rem; border-radius:8px; margin-bottom:1rem;">
+            <p style="color:#4FC3F7; font-weight:bold; margin:0 0 0.3rem 0;">🤖 Gemini API Key</p>
+            <p style="color:#B0C4D8; font-size:0.88rem; margin:0;">
+                Optional — only needed for the AI Insights tab (ML vs LLM comparison,
+                topic extraction, aspect sentiment). The ML analysis runs without it.
+                Get a free key at <strong>aistudio.google.com/apikey</strong>.
+            </p>
+        </div>
+        <div style="background-color:#1A2332; padding:1rem; border-radius:8px; margin-bottom:1rem;">
+            <p style="color:#4FC3F7; font-weight:bold; margin:0 0 0.3rem 0;">🚀 Ready to start?</p>
+            <p style="color:#B0C4D8; font-size:0.88rem; margin:0;">
+                Leave all settings at their defaults and click
+                <strong>Run Analysis</strong>. The ML model trains in seconds.
+                Add a Gemini key to unlock the AI comparison features.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+    st.markdown("### 💡 What You'll Get")
+    sample_cols = st.columns(3)
+    samples = [
+        "📊 Rating distributions and sentiment breakdown across all reviews",
+        "🤖 TF-IDF + Logistic Regression classifier with accuracy metrics",
+        "✨ Gemini zero-shot classification vs ML head-to-head comparison",
+    ]
+    for i, q in enumerate(samples):
+        with sample_cols[i]:
+            st.markdown(f"""
+            <div style="background-color:#1A2332; padding:0.7rem 1rem; border-radius:8px;
+                        border:1px solid #2A3A4A;">
+                <p style="color:#B0C4D8; font-size:0.88rem; margin:0;">{q}</p>
+            </div>
+            """, unsafe_allow_html=True)
